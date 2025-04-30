@@ -120,3 +120,13 @@ Example command:
 ```sh
 bun cli view 0x71F5E2253db3edddeA95277b9403219D6F6Ab424
 ```
+
+## Using bots
+
+### Exit bot
+
+In order to compute the exit condition, complete the `exitCondition` in `src/bots/exit.ts` and run it once ready with `bun run src/bots/exit.ts`
+
+### Price grid move bot
+
+In order to compute the price change condition, complete the `changePrice` in `src/bots/replace.ts` and run it once ready with `bun run src/bots/replace.ts`
