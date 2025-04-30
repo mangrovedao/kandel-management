@@ -3,6 +3,7 @@ import { cashnesses, registry } from "./utils/registry";
 import {
   createPublicClient,
   createWalletClient,
+  erc20Abi,
   formatEther,
   formatUnits,
   http,
@@ -25,6 +26,7 @@ import { retractKandel } from "./actions/retract";
 import { getBook } from "@mangrovedao/mgv/actions";
 import { BA } from "@mangrovedao/mgv/lib";
 import { populateKandel } from "./actions/populate";
+import { multicall } from "viem/actions";
 
 declare global {
   interface BigInt {
@@ -343,4 +345,62 @@ program
     );
   });
 
+program
+  .command("balances")
+  .argument("<address>", "Address to get balances for")
+  .addOption(rpcUrlOption)
+  .addOption(chainOption)
+  .action(async (address, options) => {
+    const entry = registry[options.chain as keyof typeof registry];
+
+    const client = createPublicClient({
+      transport: http(options.rpcUrl),
+      chain: entry.chain,
+    });
+
+    const markets = await client
+      .extend(mangroveActions(entry.mangrove))
+      .getOpenMarkets({
+        cashnesses: cashnesses,
+      });
+
+    const { market } = (await inquirer.prompt([
+      {
+        type: "select",
+        choices: markets.map((m) => ({
+          name: `${m.base.symbol}/${m.quote.symbol} (${m.tickSpacing})`,
+          value: m,
+        })),
+        message: "Select a market",
+        name: "market",
+      },
+    ])) as { market: MarketParams };
+
+    const [baseBalance, quoteBalance] = await multicall(client, {
+      contracts: [
+        {
+          abi: erc20Abi,
+          address: market.base.address,
+          functionName: "balanceOf",
+          args: [address],
+        },
+        {
+          abi: erc20Abi,
+          address: market.quote.address,
+          functionName: "balanceOf",
+          args: [address],
+        },
+      ],
+      allowFailure: false,
+    });
+
+    console.table({
+      base: `${formatUnits(baseBalance, market.base.decimals)} ${
+        market.base.symbol
+      }`,
+      quote: `${formatUnits(quoteBalance, market.quote.decimals)} ${
+        market.quote.symbol
+      }`,
+    });
+  });
 program.parse();
