@@ -1,0 +1,24 @@
+{
+  "name": "kandel-management",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "^1.2.11"
+  },
+  "peerDependencies": {
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "cli": "bun run src/index.ts"
+  },
+  "dependencies": {
+    "@mangrovedao/mgv": "^0.9.23",
+    "commander": "^13.1.0",
+    "inquirer": "^12.6.0",
+    "ora": "^8.2.0",
+    "pino": "^9.6.0",
+    "pino-pretty": "^13.0.0",
+    "viem": "^2.28.1"
+  }
+}
