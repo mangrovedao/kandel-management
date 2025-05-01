@@ -23,7 +23,9 @@ async function exitCondition(
   market: MarketParams
 ) {
   // TODO: implement exit condition
-  return false;
+  const noBids = state.bids.every((bid) => bid.gives === 0n);
+  const noAsks = state.asks.every((ask) => ask.gives === 0n);
+  return noBids || noAsks;
 }
 
 async function botLoop(market: MarketParams, interval: number) {
