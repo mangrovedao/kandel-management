@@ -24,8 +24,8 @@ async function main() {
   const market = await getKandelMarket(client, kandel, baseMangrove);
 
   const midPrice = 1 / 1_079_058;
-  const pricePoints = 21;
-  const priceOffset = 1.05; // 5% offset
+  const pricePoints = 41;
+  const priceOffset = 1.05; // 10% offset
   const offsetTotal = priceOffset ** (pricePoints / 2);
   const minPrice = midPrice / offsetTotal;
   const maxPrice = midPrice * offsetTotal;
