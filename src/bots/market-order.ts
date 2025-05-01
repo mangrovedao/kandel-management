@@ -35,9 +35,11 @@ export async function marketOrder() {
 
   const { asksMarket, bidsMarket } = getSemibooksOLKeys(market);
 
+  const marketToConsume = asksMarket;
+
   const approval = await client.readContract({
     abi: erc20Abi,
-    address: asksMarket.inbound_tkn,
+    address: marketToConsume.inbound_tkn,
     functionName: "allowance",
     args: [client.account.address, baseMangrove.mgv],
   });
@@ -45,7 +47,7 @@ export async function marketOrder() {
   if (approval < maxUint128) {
     const { request } = await client.simulateContract({
       abi: erc20Abi,
-      address: asksMarket.inbound_tkn,
+      address: marketToConsume.inbound_tkn,
       functionName: "approve",
       args: [baseMangrove.mgv, maxUint256],
     });
@@ -60,7 +62,7 @@ export async function marketOrder() {
     client,
     baseMangrove,
     {
-      olKey: asksMarket,
+      olKey: marketToConsume,
       maxTick: MAX_TICK,
       fillVolume: parseEther("0.01"),
       fillWants: true,
