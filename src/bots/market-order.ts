@@ -1,5 +1,15 @@
 import { baseMangrove } from "@mangrovedao/mgv/addresses";
-import { http, isAddress, parseEther, type Address, type Hex } from "viem";
+import {
+  erc20Abi,
+  http,
+  isAddress,
+  maxUint128,
+  maxUint256,
+  parseEther,
+  publicActions,
+  type Address,
+  type Hex,
+} from "viem";
 import { createWalletClient } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { getKandelMarket } from "../read/kandel-market";
@@ -13,7 +23,7 @@ export async function marketOrder() {
     account: privateKeyToAccount(process.env.PRIVATE_KEY as Hex),
     transport: http(process.env.RPC_URL),
     chain: base,
-  });
+  }).extend(publicActions);
 
   const kandel = process.env.KANDEL as Address;
 
@@ -25,14 +35,39 @@ export async function marketOrder() {
 
   const { asksMarket, bidsMarket } = getSemibooksOLKeys(market);
 
-  const test = await simulateMarketOrderByTick(client, baseMangrove, {
-    olKey: asksMarket,
-    maxTick: MAX_TICK,
-    fillVolume: parseEther("0.01"),
-    fillWants: true,
+  const approval = await client.readContract({
+    abi: erc20Abi,
+    address: asksMarket.inbound_tkn,
+    functionName: "allowance",
+    args: [client.account.address, baseMangrove.mgv],
   });
 
-  const tx = await client.writeContract(test.request);
+  if (approval < maxUint128) {
+    const { request } = await client.simulateContract({
+      abi: erc20Abi,
+      address: asksMarket.inbound_tkn,
+      functionName: "approve",
+      args: [baseMangrove.mgv, maxUint256],
+    });
+    console.log("Approving");
+    const tx = await client.writeContract(request);
+    const receipt = await waitForTransactionReceipt(client, { hash: tx });
+    if (receipt.status !== "success") throw new Error("Approval failed");
+    console.log("Approved");
+  }
+
+  const { request, takerGave, takerGot } = await simulateMarketOrderByTick(
+    client,
+    baseMangrove,
+    {
+      olKey: asksMarket,
+      maxTick: MAX_TICK,
+      fillVolume: parseEther("0.01"),
+      fillWants: true,
+    }
+  );
+
+  const tx = await client.writeContract(request);
   console.log(tx);
   const receipt = await waitForTransactionReceipt(client, { hash: tx });
   console.log(receipt);
