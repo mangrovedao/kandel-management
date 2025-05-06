@@ -326,23 +326,31 @@ program
       console.log("No offers found");
       return;
     }
-    console.log("\nOffers: ");
-    console.table(
-      offers.map((offer) => ({
-        type: offer.ba,
-        price: offer.price,
-        amount:
-          offer.ba === BA.asks
-            ? `${formatUnits(offer.gives, market.base.decimals)} ${
-                market.base.symbol
-              }`
-            : `${formatUnits(offer.gives, market.quote.decimals)} ${
-                market.quote.symbol
-              }`,
-        tick: offer.tick,
-        provision: formatEther(offer.provision),
-      }))
-    );
+   
+  // Step 1: Filter out offers with zero gives
+  const filtered = offers
+  .filter(offer => offer.gives !== 0n)
+  .map(offer => ({
+    type: offer.ba,
+    price: offer.price.toExponential(),
+    amount:
+      offer.ba === BA.asks
+        ? `${formatUnits(offer.gives, market.base.decimals)} ${market.base.symbol}`
+        : `${formatUnits(offer.gives, market.quote.decimals)} ${market.quote.symbol}`,
+    tick: offer.tick,
+    provision: formatEther(offer.provision),
+  }));
+
+  // Step 2: Separate into bids and asks
+  const bids = filtered.filter(row => row.type !== BA.asks);
+  const asks = filtered.filter(row => row.type === BA.asks);
+
+  // Step 3: Output to console
+  console.log("\nBids: ");
+  console.table(bids);
+  // console.log(); // Add a blank line
+  console.log("\nAsks: ");
+  console.table(asks);
   });
 
 program
