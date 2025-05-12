@@ -26,7 +26,6 @@ export async function marketOrder() {
   }).extend(publicActions);
 
   const kandel = process.env.KANDEL as Address;
-
   if (!isAddress(kandel, { strict: true })) throw new Error("not an address");
 
   const market = await getKandelMarket(client, kandel, baseMangrove);
@@ -63,8 +62,8 @@ export async function marketOrder() {
     baseMangrove,
     {
       olKey: marketToConsume,
-      maxTick: MAX_TICK,
-      fillVolume: parseEther("0.01"),
+      maxTick: -136104n, //MAX_TICK,
+      fillVolume: parseEther("100000"),
       fillWants: true,
     }
   );
@@ -74,3 +73,9 @@ export async function marketOrder() {
   const receipt = await waitForTransactionReceipt(client, { hash: tx });
   console.log(receipt);
 }
+
+marketOrder().catch((err) => {
+  console.log("test");
+  console.error(err);
+  process.exit(1);
+});
