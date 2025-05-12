@@ -4,16 +4,20 @@
   "type": "module",
   "private": true,
   "devDependencies": {
+    "@types/big.js": "^6.2.2",
     "@types/bun": "^1.2.11"
   },
   "peerDependencies": {
     "typescript": "^5.8.3"
   },
   "scripts": {
-    "cli": "bun run src/index.ts"
+    "cli": "bun run src/index.ts",
+    "monitor": "bun run src/monitor-kandel.ts",
+    "monitor-offers": "bun run src/monitor-kandel-offers.ts"
   },
   "dependencies": {
     "@mangrovedao/mgv": "^0.9.23",
+    "big.js": "^7.0.1",
     "commander": "^13.1.0",
     "inquirer": "^12.6.0",
     "ora": "^8.2.0",
