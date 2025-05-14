@@ -346,11 +346,13 @@ program
   const asks = filtered.filter(row => row.type === BA.asks);
 
   // Step 3: Output to console
-  console.log("\nBids: ");
+  console.log("\nOffers: ");
+  asks.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
+  console.table(asks);
+  // console.log("\nBids: ");
+  bids.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
   console.table(bids);
   // console.log(); // Add a blank line
-  console.log("\nAsks: ");
-  console.table(asks);
   });
 
 program
