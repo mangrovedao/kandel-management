@@ -14,4 +14,6 @@ export const registry = {
 export const cashnesses = {
   PRL: 1,
   WETH: 300,
+  USDC: 1000,
+  EURC: 999,
 } as const;
